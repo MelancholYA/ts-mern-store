@@ -9,4 +9,4 @@ const errorHandler = (err, req, res, next) => {
     };
     res.status(resStatus).send(errorBody);
 };
-module.exports = errorHandler;
+exports.default = errorHandler;

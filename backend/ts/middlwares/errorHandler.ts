@@ -2,7 +2,7 @@ import { Request, NextFunction, Response } from 'express';
 
 type Ierror = {
 	message: string;
-	stack: string;
+	stack?: string | null;
 	status: number;
 };
 
@@ -22,4 +22,4 @@ const errorHandler = (
 	res.status(resStatus).send(errorBody);
 };
 
-module.exports = errorHandler;
+export default errorHandler;

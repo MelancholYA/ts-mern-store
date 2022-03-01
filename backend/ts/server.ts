@@ -1,9 +1,13 @@
 import express from 'express';
-const errorHandler = require('./middlwares/errorHandler');
+import errorHandler from './middlwares/errorHandler';
 import router from './routes/categoriesRoute';
+import connectDB from './config/db';
+import dotenv from 'dotenv/config';
+
+dotenv;
+connectDB();
 
 const app = express();
-const dotenv = require('dotenv').config();
 const port = process.env.port || 5000;
 
 app.use(express.json());
