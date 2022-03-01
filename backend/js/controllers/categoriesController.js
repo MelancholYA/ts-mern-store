@@ -21,10 +21,13 @@ const getCategories = (0, express_async_handler_1.default)((Request, Response) =
 }));
 exports.getCategories = getCategories;
 const setCategories = (0, express_async_handler_1.default)((Request, Response) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!Request.body.category) {
-        Response.status(400);
-        throw new Error('no category was provided');
-    }
+    // if (!Request.body.category) {
+    // 	Response.status(400);
+    // 	throw new Error('no category was provided');
+    // }
+    yield categoryModel_1.default.create({
+        name: 'fff',
+    });
     Response.send('add to cat list');
 }));
 exports.setCategories = setCategories;

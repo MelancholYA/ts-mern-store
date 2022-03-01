@@ -11,10 +11,13 @@ const getCategories = asyncHandler(
 
 const setCategories = asyncHandler(
 	async (Request: Request, Response: Response): Promise<void> => {
-		if (!Request.body.category) {
-			Response.status(400);
-			throw new Error('no category was provided');
-		}
+		// if (!Request.body.category) {
+		// 	Response.status(400);
+		// 	throw new Error('no category was provided');
+		// }
+		await category.create({
+			name: 'fff',
+		});
 		Response.send('add to cat list');
 	},
 );
