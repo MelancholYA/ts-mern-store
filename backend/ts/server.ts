@@ -13,8 +13,10 @@ const port = process.env.port || 5000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use('/api/categories', categoriesRouter);
 app.use('/api/products', productsRouter);
+
 app.use(errorHandler);
 
 app.listen(port, () => {

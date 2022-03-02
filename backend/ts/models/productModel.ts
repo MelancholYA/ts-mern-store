@@ -20,7 +20,17 @@ const productSchema = new Schema(
 			type: String,
 			required: [true, 'please add a description'],
 		},
-		categories: [],
+		images: {
+			default: {
+				type: String,
+				required: [true, 'please add a product image'],
+			},
+			thumbs: [String],
+		},
+		categories: {
+			type: String,
+			required: [true, 'please add at least one category'],
+		},
 	},
 	{
 		timestamps: true,
