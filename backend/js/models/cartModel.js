@@ -6,10 +6,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const { Schema } = mongoose_1.default;
 const cartSchema = new Schema({
-    products: [String],
-    userId: {
-        type: String,
+    products: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'product',
+        },
+    ],
+    user: {
+        type: Schema.Types.ObjectId,
         required: [true, 'please add a user id'],
+        ref: 'user',
     },
 }, {
     timestamps: true,

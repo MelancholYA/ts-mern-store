@@ -1,9 +1,12 @@
 import express from 'express';
 import errorHandler from './middlwares/errorHandler';
-import categoriesRouter from './routes/categoriesRoute';
-import productsRouter from './routes/productsRoute';
 import connectDB from './config/db';
 import dotenv from 'dotenv/config';
+
+//Routes
+import categoriesRouter from './routes/categoriesRoute';
+import productsRouter from './routes/productsRoute';
+import userRouter from './routes/userRoute';
 
 dotenv;
 connectDB();
@@ -16,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/categories', categoriesRouter);
 app.use('/api/products', productsRouter);
+app.use('/api/users', userRouter);
 
 app.use(errorHandler);
 

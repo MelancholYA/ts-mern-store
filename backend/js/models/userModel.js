@@ -13,14 +13,19 @@ const userSchema = new Schema({
     email: {
         type: String,
         required: [true, 'email is required'],
+        unique: true,
     },
     picture: String,
     address: String,
+    admin: Boolean,
     password: {
         type: String,
         required: [true, 'password is required'],
     },
-    cart: String,
+    cart: {
+        type: mongoose_1.default.Types.ObjectId,
+        ref: 'cart',
+    },
     orders: [String],
 }, {
     timestamps: true,
