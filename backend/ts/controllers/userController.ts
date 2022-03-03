@@ -5,12 +5,14 @@ import user from '../models/userModel';
 import cart from '../models/cartModel';
 import bcrypt from 'bcryptjs';
 import generateToken from '../utils/generateJWT';
+import admin from '../models/adminModel';
 
 type Tuser = {
 	_id: mongoose.Types.ObjectId;
+
 	name: string;
 	email: string;
-	password: string;
+	password?: string;
 	orders: mongoose.Types.ObjectId[];
 	createdAt: string;
 	updatedAt: string;
@@ -24,10 +26,21 @@ type Tcart = {
 	user: mongoose.Types.ObjectId;
 	products: mongoose.Types.ObjectId[];
 };
+type Tadmin = {
+	name: string;
+	email: string;
+	admin: boolean;
+	id: mongoose.Types.ObjectId;
+} | null;
+type TreqData = {
+	name?: string;
+	email: string;
+	password: string;
+};
 
 const registerUser = asyncHandler(
 	async (Request: Request, Response: Response): Promise<void> => {
-		let { name, email, password } = Request.body;
+		let { name, email, password }: TreqData = Request.body;
 		if (!name || !email || !password) {
 			Response.status(400);
 			throw new Error('Invalid credentials');
@@ -40,7 +53,7 @@ const registerUser = asyncHandler(
 		let salt = await bcrypt.genSalt(7);
 		let hashedPassword = await bcrypt.hash(password, salt);
 		await user
-			.create({ name, email, password: hashedPassword })
+			.create({ name, email, password: hashedPassword, admin: false })
 			.then(async (res) => {
 				let cartItem: Tcart = await cart.create({
 					products: [],
@@ -72,21 +85,87 @@ const registerUser = asyncHandler(
 			});
 	},
 );
+const addAdmin = asyncHandler(
+	async (Request: Request, Response: Response): Promise<void> => {
+		let { name, email, password }: TreqData = Request.body;
+		if (!name || !email || !password) {
+			Response.status(400);
+			throw new Error('Invalid credentials');
+		}
+		if (!Request.admin?.admin) {
+			Response.status(400);
+			throw new Error('Not authorized , not admin');
+		}
+		let alreadyUser: Tuser = await user.findOne({ email });
+		if (alreadyUser) {
+			Response.status(400);
+			throw new Error(
+				'user already have a normal user account , please remove it first',
+			);
+		}
+		let alreadyExists: Tadmin = await admin.findOne({ email });
+		if (alreadyExists) {
+			Response.status(400);
+			throw new Error('Email already exists');
+		}
+		let salt = await bcrypt.genSalt(7);
+		let hashedPassword = await bcrypt.hash(password, salt);
+		await admin
+			.create({
+				name,
+				email,
+				password: hashedPassword,
+				admin: true,
+			})
+			.then((res: Tadmin) => {
+				let token: string | null = generateToken({
+					id: res?.id,
+					name: res?.name,
+					email: res?.email,
+					admin: res?.admin,
+				});
+				if (token) {
+					Response.status(201).json({
+						token,
+					});
+				} else {
+					Response.status(500);
+					throw new Error('admin created with no JWT ');
+				}
+			})
+			.catch((err) => {
+				Response.status(500);
+				throw new Error(err);
+			});
+	},
+);
 const loginUser = asyncHandler(
 	async (Request: Request, Response: Response): Promise<void> => {
-		const { email, password } = Request.body;
+		const { email, password }: TreqData = Request.body;
 		if (!email || !password) {
 			Response.status(400);
 			throw new Error('invalid credianltials');
 		}
 		let userData: Tuser = await user
 			.findOne({ email })
-			.select('-password -__v -createdAt -updatedAt');
+			.select('-__v -createdAt -updatedAt');
 		if (!userData) {
 			Response.status(400);
 			throw new Error('no user was found with this email');
 		}
-		let token = generateToken(userData);
+		let isSamePassword = bcrypt.compareSync(password, userData.password || '');
+		if (!isSamePassword) {
+			Response.status(500);
+			throw new Error('wrong password');
+		}
+
+		let token = generateToken({
+			id: userData._id,
+			email: userData.email,
+			name: userData.name,
+			orders: userData.orders,
+			cart: userData.cart,
+		});
 		if (!token) {
 			Response.status(500);
 			throw new Error("couldn't generate token");
@@ -95,7 +174,6 @@ const loginUser = asyncHandler(
 		Response.status(200).json({ token });
 	},
 );
-
 const updateUser = asyncHandler(
 	async (Request: Request, Response: Response): Promise<void> => {
 		const newData = Request.body;
@@ -103,7 +181,7 @@ const updateUser = asyncHandler(
 			delete newData.password;
 		}
 		await user
-			.findByIdAndUpdate(Request?.user._id, newData, { new: true })
+			.findByIdAndUpdate(Request?.user?._id, newData)
 			.then((res) => {
 				Response.status(204).json();
 			})
@@ -113,5 +191,36 @@ const updateUser = asyncHandler(
 			});
 	},
 );
+const changeUserPassword = asyncHandler(
+	async (Request: Request, Response: Response): Promise<void> => {
+		const { email, currPassword, newPassword } = Request.body;
+		if (!email || !currPassword || !newPassword) {
+			Response.status(400);
+			throw new Error('invalid credianltials');
+		}
+		let userData: Tuser = await user.findOne({ email });
+		if (!userData) {
+			Response.status(400);
+			throw new Error('no user was found with this email');
+		}
+		let isSamePassword: boolean = bcrypt.compareSync(
+			currPassword,
+			userData.password || '',
+		);
+		if (!isSamePassword) {
+			Response.status(500);
+			throw new Error('wrong password');
+		}
+		let salt = await bcrypt.genSalt(7);
+		let hashedPassword = await bcrypt.hash(newPassword, salt);
+		await user
+			.findOneAndUpdate({ email }, { password: hashedPassword })
+			.then((res) => Response.status(204).json())
+			.catch((err) => {
+				Response.status(500);
+				throw new Error(err);
+			});
+	},
+);
 
-export { registerUser, loginUser, updateUser };
+export { registerUser, loginUser, updateUser, addAdmin, changeUserPassword };

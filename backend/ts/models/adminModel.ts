@@ -1,8 +1,6 @@
 import mongoose from 'mongoose';
-import cart from './cartModel';
-const { Schema } = mongoose;
 
-const userSchema = new Schema(
+const adminSchema = new mongoose.Schema(
 	{
 		name: {
 			type: String,
@@ -13,21 +11,15 @@ const userSchema = new Schema(
 			required: [true, 'email is required'],
 			unique: true,
 		},
-		picture: String,
-		address: String,
+		admin: Boolean,
 		password: {
 			type: String,
 			required: [true, 'password is required'],
 		},
-		cart: {
-			type: mongoose.Types.ObjectId,
-			ref: 'cart',
-		},
-		orders: [String],
 	},
 	{
 		timestamps: true,
 	},
 );
-const user = mongoose.model('user', userSchema);
-export default user;
+const admin = mongoose.model('admin', adminSchema);
+export default admin;

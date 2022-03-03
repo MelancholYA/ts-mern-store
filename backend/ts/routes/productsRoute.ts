@@ -6,10 +6,15 @@ import {
 	deleteProduct,
 	getproduct,
 } from '../controllers/productsController';
+import { protectForAdmin } from '../middlwares/authMiddlware';
 
 const router = Router();
 
-router.route('/').get(getproducts).post(setProducts);
-router.route('/:id').get(getproduct).put(editProducts).delete(deleteProduct);
+router.route('/').get(getproducts).post(protectForAdmin, setProducts);
+router
+	.route('/:id')
+	.get(getproduct)
+	.put(protectForAdmin, editProducts)
+	.delete(protectForAdmin, deleteProduct);
 
 export default router;
