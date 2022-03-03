@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUser = exports.loginUser = exports.registerUser = void 0;
+exports.updateUser = exports.loginUser = exports.registerUser = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const cartModel_1 = __importDefault(require("../models/cartModel"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const generateJWT_1 = __importDefault(require("../utils/generateJWT"));
 const registerUser = (0, express_async_handler_1.default)((Request, Response) => __awaiter(void 0, void 0, void 0, function* () {
     let { name, email, password } = Request.body;
     if (!name || !email || !password) {
@@ -40,9 +41,18 @@ const registerUser = (0, express_async_handler_1.default)((Request, Response) =>
         let userItem = yield userModel_1.default
             .findByIdAndUpdate(res._id, {
             cart: cartItem._id,
-        }, { returnDocument: 'after' })
-            .select('-password');
-        Response.status(201).json(userItem);
+        }, { new: true })
+            .select('-password -__v -createdAt -updatedAt');
+        let token = (0, generateJWT_1.default)(userItem);
+        if (token) {
+            Response.status(201).json({
+                token,
+            });
+        }
+        else {
+            res.status(500);
+            throw new Error('user created with no JWT');
+        }
     }))
         .catch((err) => {
         Response.status(500);
@@ -51,10 +61,39 @@ const registerUser = (0, express_async_handler_1.default)((Request, Response) =>
 }));
 exports.registerUser = registerUser;
 const loginUser = (0, express_async_handler_1.default)((Request, Response) => __awaiter(void 0, void 0, void 0, function* () {
-    Response.status(200).send('logeed in');
+    const { email, password } = Request.body;
+    if (!email || !password) {
+        Response.status(400);
+        throw new Error('invalid credianltials');
+    }
+    let userData = yield userModel_1.default
+        .findOne({ email })
+        .select('-password -__v -createdAt -updatedAt');
+    if (!userData) {
+        Response.status(400);
+        throw new Error('no user was found with this email');
+    }
+    let token = (0, generateJWT_1.default)(userData);
+    if (!token) {
+        Response.status(500);
+        throw new Error("couldn't generate token");
+    }
+    Response.status(200).json({ token });
 }));
 exports.loginUser = loginUser;
-const getUser = (0, express_async_handler_1.default)((Request, Response) => __awaiter(void 0, void 0, void 0, function* () {
-    Response.status(200).send('user data');
+const updateUser = (0, express_async_handler_1.default)((Request, Response) => __awaiter(void 0, void 0, void 0, function* () {
+    const newData = Request.body;
+    if (newData.password) {
+        delete newData.password;
+    }
+    yield userModel_1.default
+        .findByIdAndUpdate(Request === null || Request === void 0 ? void 0 : Request.user._id, newData, { new: true })
+        .then((res) => {
+        Response.status(204).json();
+    })
+        .catch((err) => {
+        Response.status(400);
+        throw new Error(err);
+    });
 }));
-exports.getUser = getUser;
+exports.updateUser = updateUser;

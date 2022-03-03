@@ -2,13 +2,14 @@ import { Router } from 'express';
 import {
 	registerUser,
 	loginUser,
-	getUser,
+	updateUser,
 } from '../controllers/userController';
+import protect from '../middlwares/authMiddlware';
 
 const router = Router();
 
 router.route('/new').post(registerUser);
-router.route('/me').get(getUser);
+router.route('/update').put(protect, updateUser);
 router.route('/login').post(loginUser);
 
 export default router;
