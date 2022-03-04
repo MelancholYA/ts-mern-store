@@ -5,10 +5,14 @@ import {
 	getCategories,
 	setCategories,
 } from '../controllers/categoriesController';
+import { protectForAdmin } from '../middlwares/authMiddlware';
 
 const router = Router();
 
-router.route('/').get(getCategories).post(setCategories);
-router.route('/:id').put(editCategory).delete(deleteCategory);
+router.route('/').get(getCategories).post(protectForAdmin, setCategories);
+router
+	.route('/:id')
+	.put(protectForAdmin, editCategory)
+	.delete(protectForAdmin, deleteCategory);
 
 export default router;
