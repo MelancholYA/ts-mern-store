@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const adminController_1 = require("../controllers/adminController");
+const authMiddlware_1 = require("../middlwares/authMiddlware");
+const router = (0, express_1.Router)();
+router.delete('/:id', authMiddlware_1.protectForAdmin, adminController_1.deleteAdmin);
+router.route('/new').post(authMiddlware_1.protectForAdmin, adminController_1.addAdmin);
+router.route('/changePasword').put(authMiddlware_1.protectForAdmin, adminController_1.changeAdminPassword);
+exports.default = router;

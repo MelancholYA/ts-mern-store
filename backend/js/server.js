@@ -11,6 +11,7 @@ const config_1 = __importDefault(require("dotenv/config"));
 const categoriesRoute_1 = __importDefault(require("./routes/categoriesRoute"));
 const productsRoute_1 = __importDefault(require("./routes/productsRoute"));
 const userRoute_1 = __importDefault(require("./routes/userRoute"));
+const adminRoute_1 = __importDefault(require("./routes/adminRoute"));
 config_1.default;
 (0, db_1.default)();
 const app = (0, express_1.default)();
@@ -20,6 +21,7 @@ app.use(express_1.default.urlencoded({ extended: true }));
 app.use('/api/categories', categoriesRoute_1.default);
 app.use('/api/products', productsRoute_1.default);
 app.use('/api/users', userRoute_1.default);
+app.use('/api/admin', adminRoute_1.default);
 app.use(errorHandler_1.default);
 app.listen(port, () => {
     console.log(`server is listening on port ${port}`);

@@ -3,17 +3,17 @@ import {
 	registerUser,
 	loginUser,
 	updateUser,
-	addAdmin,
 	changeUserPassword,
+	deleteUser,
 } from '../controllers/userController';
 import { protect, protectForAdmin } from '../middlwares/authMiddlware';
 
 const router = Router();
 
-router.route('/new').post(registerUser);
-router.route('/update').put(protect, updateUser);
-router.route('/newAdmin').post(protectForAdmin, addAdmin);
-router.route('/login').post(loginUser);
-router.route('/changePassword').post(changeUserPassword);
+router.post('/new', registerUser);
+router.put('/update', protect, updateUser);
+router.post('/login', loginUser);
+router.post('/changePassword', changeUserPassword);
+router.delete('/:id', protectForAdmin, deleteUser);
 
 export default router;

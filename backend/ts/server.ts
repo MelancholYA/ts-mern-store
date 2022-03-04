@@ -7,6 +7,7 @@ import dotenv from 'dotenv/config';
 import categoriesRouter from './routes/categoriesRoute';
 import productsRouter from './routes/productsRoute';
 import userRouter from './routes/userRoute';
+import adminRouter from './routes/adminRoute';
 
 dotenv;
 connectDB();
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/categories', categoriesRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/users', userRouter);
+app.use('/api/admin', adminRouter);
 
 app.use(errorHandler);
 
