@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
-const { Schema } = mongoose;
 
-const productSchema = new Schema(
+const productSchema = new mongoose.Schema(
 	{
 		name: {
 			type: String,
@@ -27,10 +26,13 @@ const productSchema = new Schema(
 			},
 			thumbs: [String],
 		},
-		categories: {
-			type: String,
-			required: [true, 'please add at least one category'],
-		},
+		categories: [
+			{
+				type: mongoose.Types.ObjectId,
+				required: [true, 'please add at least one category'],
+				ref: 'category',
+			},
+		],
 	},
 	{
 		timestamps: true,

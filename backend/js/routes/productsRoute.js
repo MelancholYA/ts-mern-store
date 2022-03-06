@@ -5,6 +5,7 @@ const productsController_1 = require("../controllers/productsController");
 const authMiddlware_1 = require("../middlwares/authMiddlware");
 const router = (0, express_1.Router)();
 router.route('/').get(productsController_1.getproducts).post(authMiddlware_1.protectForAdmin, productsController_1.setProducts);
+router.get('/category/:id', productsController_1.getProductByCategory);
 router
     .route('/:id')
     .get(productsController_1.getproduct)
